@@ -9,6 +9,7 @@ import {
     validateForm,
 } from "../../form/formFramework";
 import Auxiliary from "../../hoc/Auxiliary/Auxiliary";
+import axios from "../../axios/axios-quiz";
 
 function createOptionControl(number) {
     return createControl(
@@ -37,7 +38,7 @@ function createFormControls() {
     };
 }
 
-class QuizCreator extends Component {
+export default class QuizCreator extends Component {
     state = {
         quiz: [],
         isFormValid: false,
@@ -67,23 +68,11 @@ class QuizCreator extends Component {
             question: question.value,
             id: index,
             rightAnswerId: this.state.rightAnswerId,
-            answer: [
-                {
-                    text: option1.value,
-                    id: option1.id,
-                },
-                {
-                    text: option2.value,
-                    id: option2.id,
-                },
-                {
-                    text: option3.value,
-                    id: option3.id,
-                },
-                {
-                    text: option4.value,
-                    id: option4.id,
-                },
+            answers: [
+                { text: option1.value, id: option1.id },
+                { text: option2.value, id: option2.id },
+                { text: option3.value, id: option3.id },
+                { text: option4.value, id: option4.id },
             ],
         };
 
@@ -97,11 +86,21 @@ class QuizCreator extends Component {
         });
     };
 
-    createQuizHandler = (event) => {
+    createQuizHandler = async (event) => {
         event.preventDefault();
 
-        console.log(this.state.quiz);
-        // TODO: Server
+        try {
+            await axios.post("/quizes.json", this.state.quiz);
+
+            this.setState({
+                quiz: [],
+                isFormValid: false,
+                rightAnswerId: 1,
+                formControls: createFormControls(),
+            });
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     changeHandler = (value, controlName) => {
@@ -173,6 +172,7 @@ class QuizCreator extends Component {
             <div className={classes.QuizCreator}>
                 <div>
                     <h1>Создание теста</h1>
+
                     <form onSubmit={this.submitHandler}>
                         {this.renderControls()}
 
@@ -199,5 +199,3 @@ class QuizCreator extends Component {
         );
     }
 }
-
-export default QuizCreator;
